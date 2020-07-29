@@ -1,0 +1,23 @@
+state:
+  the static state of the game - all of the things you could see
+  if you walked up on an abandoned game. So,
+  - the deck
+  - the players and their hands
+  - the discard piles
+
+game:
+  All of the rules and transformations between game states.
+  So,
+  - who's turn is it
+  - dealing out the cards
+  - playing cards and validating moves
+  - checking for winner
+  - communicating state changes to UI
+  -
+
+ui:
+  Displays the game state and state changes.
+  - cards left in stack
+  - all discard piles
+  - each player's card
+  - messages
