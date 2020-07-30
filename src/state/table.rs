@@ -1,8 +1,8 @@
 use crate::state::deck::Deck;
 use crate::state::player::Player;
 use crate::Error;
+use fehler::{throw, throws};
 use std::fmt::{Display, Formatter};
-use fehler::{throw,throws};
 
 #[derive(Debug, Default)]
 pub struct Table {
@@ -13,7 +13,7 @@ pub struct Table {
 impl Table {
     #[throws]
     pub fn new(num_players: usize) -> Table {
-        if num_players != 3 && num_players !=4 {
+        if num_players != 3 && num_players != 4 {
             throw!(Error::InvalidNumberOfPlayers(num_players));
         }
         let mut players = Vec::new();

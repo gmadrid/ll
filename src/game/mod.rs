@@ -1,7 +1,7 @@
-use crate::Error;
 use crate::state::{Player, Table};
+use crate::Error;
+use fehler::throws;
 use std::fmt::{Display, Formatter};
-use fehler::{throws};
 
 pub struct GameBuilder {
     num_players: usize,
