@@ -22,3 +22,61 @@ ui:
   - each player's card
   - messages
 
+Cards:
+Guard: FROM_PLAYER TARGET_PLAYER GUESS
+  - FROM_PLAYER is Current
+  - TARGET_PLAYER is Active
+  - TARGET_PLAYER != FROM_PLAYER
+  - TARGET_PLAYER is not Protected
+  If TARGET_PLAYER has GUESS, then they are out.
+
+  Message EVERYONE with FROM_PLAYER plays Guard on TARGET_PLAYER guessing GUESS.
+  If player is out, Message EVERYONE with LOSING_PLAYER is out with LOSING_PLAYER's card.
+
+Priest: FROM_PLAYER TARGET_PLAYER
+  - FROM_PLAYER is Current
+  - TARGET_PLAYER is Active
+  - TARGET_PLAYER != FROM_PLAYER
+  - TARGET_PLAYER is not Protected
+  Message EVERYONE with FROM_PLAYER plays Priest and looks at TARGET_PLAYER's card
+  Message FROM_PLAYER with TARGET_PLAYERs card
+
+Baron: FROM_PLAYER TARGET_PLAYER
+  - FROM_PLAYER is Current
+  - TARGET_PLAYER is Active
+  - TARGET_PLAYER != FROM_PLAYER
+  - TARGET_PLAYER is not Protected
+
+Handmaid: PLAYER
+  - PLAYER is Current
+  Player becomes Protected.
+  Message EVERYONE with PLAYER plays a Handmaid
+
+Prince: FROM_PLAYER TARGET_PLAYER
+  - FROM_PLAYER is Current
+  - TARGET_PLAYER is Active
+  - TARGET_PLAYER is not Protected
+  TARGET_PLAYER discards card with limited actions.
+  TARGET_PLAYER draws a new card.
+
+King: FROM_PLAYER TARGET_PLAYER
+  - FROM_PLAYER is Current
+  - TARGET_PLAYER is Active
+  - TARGET_PLAYER is not FROM_PLAYER
+  - TARGET_PLAYER is not Protected
+
+Countess: PLAYER
+Princess: PLAYER
+
+CardAction
+- current: Player
+- target: Option<Player>
+- card: Card
+- guess: Card
+
+Scenario:
+Game with 4 players. Just started. Player 1 is first.
+Player 1 plays
+
+Game with 3 players, Player 1 is out. Player 2 about to go.
+

@@ -48,8 +48,16 @@ name = "ll"
 version = "0.1.0"
 dependencies = [
  "fehler",
+ "memorable",
  "rand",
  "thiserror",
+]
+
+[[package]]
+name = "memorable"
+version = "0.1.0"
+dependencies = [
+ "rand",
 ]
 
 [[package]]

@@ -1,6 +1,13 @@
+mod base_game;
+mod card_action;
+mod card_rules;
+
+use crate::game::card_action::CardAction;
+use crate::messenger::Messenger;
 use crate::state::{Player, Table};
 use crate::Error;
-use fehler::throws;
+use fehler::{throw, throws};
+use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 
 pub struct GameBuilder {
@@ -23,9 +30,19 @@ impl GameBuilder {
     }
 }
 
+impl Default for GameBuilder {
+    fn default() -> Self {
+        GameBuilder::new()
+    }
+}
+
 #[derive(Debug)]
 pub struct Game {
     table: Table,
+
+    current_player: usize,
+    active: HashSet<usize>,
+    protected: HashSet<usize>,
 }
 
 impl Game {
@@ -33,13 +50,47 @@ impl Game {
     fn new(num_players: usize) -> Game {
         let mut game = Game {
             table: Table::new(num_players)?,
+            current_player: 0,
+            active: HashSet::default(),
+            protected: HashSet::default(),
         };
 
         for player_num in 0..num_players {
+            game.active.insert(player_num);
             game.deal_one_to_player(player_num)?;
         }
 
         game
+    }
+
+    #[throws]
+    fn perform_action(&mut self, action: CardAction, messenger: &mut impl Messenger) {
+        self.is_valid_action(&action)?;
+
+        messenger.message(
+            None,
+            &format!("Player {} discards a {}", action.current(), action.card()),
+        );
+        let current = self.player_mut(self.current_player)?;
+        current.discard(action.card())?;
+
+        base_game::perform_card_action(&action, self, messenger)?;
+
+        self.make_next_player_current();
+    }
+
+    #[throws]
+    fn make_inactive(&mut self, player_index: usize) {
+        todo!("");
+    }
+
+    #[throws]
+    fn make_protected(&mut self, player_index: usize) {
+        todo!("");
+    }
+
+    fn make_next_player_current(&mut self) {
+        todo!("");
     }
 
     fn is_deck_empty(&self) -> bool {
@@ -57,6 +108,23 @@ impl Game {
     #[throws]
     fn player(&self, player_num: usize) -> &Player {
         self.table.player(player_num)?
+    }
+
+    #[throws]
+    fn player_mut(&mut self, player_num: usize) -> &mut Player {
+        self.table.player_mut(player_num)?
+    }
+
+    #[throws]
+    fn is_valid_action(&self, action: &CardAction) {
+        let player = self.player(action.current())?;
+        let card = action.card();
+        if player.card_index(card).is_none() {
+            throw!(Error::BadActionPlayerDoesntHaveCard(action.current(), card));
+        }
+
+        let rules = base_game::rules_for_card(card);
+        rules.action_allowed(&action, self.current_player, &self.active, &self.protected)?;
     }
 }
 

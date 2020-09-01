@@ -33,6 +33,19 @@ impl Display for Card {
 mod test {
     use super::*;
 
+    #[test]
+    fn test_names() {
+        assert_eq!("Guard", format!("{}", Card::Guard));
+        assert_eq!("Priest", format!("{}", Card::Priest));
+        assert_eq!("Baron", format!("{}", Card::Baron));
+        assert_eq!("Handmaid", format!("{}", Card::Handmaid));
+        assert_eq!("Prince", format!("{}", Card::Prince));
+        assert_eq!("King", format!("{}", Card::King));
+        assert_eq!("Countess", format!("{}", Card::Countess));
+        assert_eq!("Princess", format!("{}", Card::Princess));
+    }
+
+    #[test]
     fn test_order() {
         // The cards have a specific order defined by the game rules.
         use Card::*;

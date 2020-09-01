@@ -17,7 +17,12 @@ impl Table {
             throw!(Error::InvalidNumberOfPlayers(num_players));
         }
         let mut players = Vec::new();
-        players.resize_with(num_players, Default::default);
+        players.push(Player::with_name("1"));
+        players.push(Player::with_name("2"));
+        players.push(Player::with_name("3"));
+        if num_players == 4 {
+            players.push(Player::with_name("4"));
+        }
         Table {
             players,
             deck: Deck::new_shuffled(),
@@ -60,5 +65,32 @@ impl Display for Table {
             writeln!(f, "{}", player)?;
         }
         write!(f, "Deck: {}", self.deck)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use fehler::throws;
+
+    #[test]
+    #[throws]
+    fn test_three_players() {
+        let mut table = Table::new(3)?;
+        assert_eq!("1", table.player(0)?.name());
+        assert_eq!("2", table.player(1)?.name());
+        assert_eq!("3", table.player(2)?.name());
+        assert!(table.player(3).is_err());
+    }
+
+    #[test]
+    #[throws]
+    fn test_four_players() {
+        let mut table = Table::new(4)?;
+        assert_eq!("1", table.player(0)?.name());
+        assert_eq!("2", table.player(1)?.name());
+        assert_eq!("3", table.player(2)?.name());
+        assert_eq!("4", table.player(3)?.name());
+        assert!(table.player(4).is_err());
     }
 }

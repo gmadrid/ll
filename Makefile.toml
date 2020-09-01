@@ -1,0 +1,22 @@
+[tasks.watch]
+command = "cargo"
+args = [ "build" ]
+watch = true
+
+[tasks.watchtest]
+dependencies = ["test"]
+watch = true
+
+[tasks.fmt]
+command = "cargo"
+args = ["fmt"]
+
+[tasks.commit]
+command = "git"
+args = ["commit", "-a"]
+dependencies = ["fmt"]
+
+[tasks.push]
+command = "git"
+args = ["push"]
+dependencies = ["commit"]
