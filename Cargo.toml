@@ -14,3 +14,4 @@ memorable = { path = "../memorable" }
 rand = "0.7.3"
 thiserror = "1.0.20"
 fehler = "1.0.0"
+objekt-clonable = "0.2.2"

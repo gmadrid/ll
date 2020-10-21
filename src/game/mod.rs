@@ -1,8 +1,8 @@
-mod base_game;
+mod original;
 mod card_action;
 mod card_rules;
 
-use crate::game::card_action::CardAction;
+pub use crate::game::card_action::CardAction;
 use crate::messenger::Messenger;
 use crate::state::{Player, Table};
 use crate::Error;
@@ -60,11 +60,17 @@ impl Game {
             game.deal_one_to_player(player_num)?;
         }
 
+	if let Some(out_card) = game.table.deck_mut().deal_one() {
+	    game.table.set_out_card(Some(out_card));
+	} else {
+	    throw!(Error::InternalErrorUnexpectedEmptyDeck);
+	}
+
         game
     }
 
     #[throws]
-    fn perform_action(&mut self, action: CardAction, messenger: &mut impl Messenger) {
+    pub fn perform_action(&mut self, action: CardAction, messenger: &mut impl Messenger) {
         self.is_valid_action(&action)?;
 
         messenger.message(
@@ -74,7 +80,7 @@ impl Game {
         let current = self.player_mut(self.current_player)?;
         current.discard(action.card())?;
 
-        base_game::perform_card_action(&action, self, messenger)?;
+        original::perform_card_action(&action, self, messenger)?;
 
         self.make_next_player_current();
     }
@@ -87,6 +93,11 @@ impl Game {
     #[throws]
     fn make_protected(&mut self, player_index: usize) {
         todo!("");
+    }
+
+    #[throws]
+    fn make_unprotected(&mut self, player_index: usize) {
+	todo!("");
     }
 
     fn make_next_player_current(&mut self) {
@@ -123,7 +134,7 @@ impl Game {
             throw!(Error::BadActionPlayerDoesntHaveCard(action.current(), card));
         }
 
-        let rules = base_game::rules_for_card(card);
+        let rules = original::rules_for_card(card);
         rules.action_allowed(&action, self.current_player, &self.active, &self.protected)?;
     }
 }

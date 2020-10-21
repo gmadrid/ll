@@ -9,11 +9,6 @@ pub struct CardAction {
     guess: Option<Card>,
 }
 
-pub struct CardActionBuilder {
-    card: Card,
-    current: usize,
-}
-
 impl CardAction {
     pub fn new(
         card: Card,
@@ -53,5 +48,26 @@ impl CardAction {
         } else {
             throw!(Error::BadActionMissingGuess);
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    #[throws]
+    fn test_basic() {
+	let action = CardAction::new(Card::Baron, 1, None, None);
+	assert_eq!(Card::Baron, action.card());
+	assert_eq!(1, action.current());
+	assert!(action.target().is_err());
+	assert!(action.guess().is_err());
+
+	let full_action = CardAction::new(Card::Prince, 3, Some(2), Some(Card::Princess));
+	assert_eq!(Card::Prince, full_action.card());
+	assert_eq!(3, full_action.current());
+	assert_eq!(2, full_action.target()?);
+	assert_eq!(Card::Princess, full_action.guess()?);
     }
 }

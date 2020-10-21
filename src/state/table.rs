@@ -1,13 +1,15 @@
+use crate::state::card::Card;
 use crate::state::deck::Deck;
 use crate::state::player::Player;
 use crate::Error;
 use fehler::{throw, throws};
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Table {
     players: Vec<Player>,
     deck: Deck,
+    out_card: Option<Box<dyn Card>>,
 }
 
 impl Table {
@@ -25,7 +27,8 @@ impl Table {
         }
         Table {
             players,
-            deck: Deck::new_shuffled(),
+            deck: Deck::new(Default::default()),
+	    out_card: None,
         }
     }
 
@@ -55,6 +58,14 @@ impl Table {
             throw!(Error::InvalidPlayerNumber(player_num));
         }
         &mut self.players[player_num]
+    }
+
+    pub fn out_card(&self) -> Option<&dyn Card> {
+	self.out_card.as_ref().map(|bc| bc.as_ref())
+    }
+
+    pub fn set_out_card(&mut self, card: Option<Box<dyn Card>>) {
+	self.out_card = card;
     }
 }
 

@@ -3,61 +3,59 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::fmt::{Display, Formatter};
 
+/// A deck of LoveLetter cards.
+///
+/// Enforces no rules, but allows only operations that would occur in a
+/// game of LoveLetter.
 #[derive(Debug)]
 pub struct Deck {
-    cards: Vec<Card>,
+    // Cards are stored in reverse order so that we can deal off the
+    // efficient end.
+    cards: Vec<Box<dyn Card>>,
 }
 
 impl Deck {
-    pub fn new_shuffled() -> Deck {
-        let mut deck = Deck::default();
-        deck.shuffle();
-        deck
+    /// Create a new Deck containing the specified cards.
+    ///
+    /// The cards will be dealt in the order that they are in the input vector.
+    pub fn new(mut cards: Vec<Box<dyn Card>>) -> Deck {
+        cards.reverse();
+        Deck { cards }
     }
 
-    pub fn cards_remaining(&self) -> u32 {
-        self.cards.len() as u32
+    /// Returns the number of cards remaining in the deck.
+    pub fn cards_remaining(&self) -> usize {
+        self.cards.len()
     }
 
-    pub fn deal_one(&mut self) -> Option<Card> {
+    /// Deals one card off the "top" of the deck.
+    ///
+    /// If the deck is empty(), returns None.
+    pub fn deal_one(&mut self) -> Option<Box<dyn Card>> {
         self.cards.pop()
     }
 
+    /// Shuffles the cards in the deck.
+    ///
+    /// After shuffling, the cards will be dealt in a random order.
     pub fn shuffle(&mut self) {
         self.cards.shuffle(&mut thread_rng());
     }
 }
 
-impl std::default::Default for Deck {
-    fn default() -> Self {
-        Deck {
-            cards: vec![
-                Card::Guard,
-                Card::Guard,
-                Card::Guard,
-                Card::Guard,
-                Card::Guard,
-                Card::Priest,
-                Card::Priest,
-                Card::Baron,
-                Card::Baron,
-                Card::Handmaid,
-                Card::Handmaid,
-                Card::Prince,
-                Card::Prince,
-                Card::King,
-                Card::Countess,
-                Card::Princess,
-            ],
-        }
-    }
-}
-
 impl Display for Deck {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self.cards.first() {
-            None => write!(f, "Empty deck"),
-            Some(card) => write!(f, "{} left. Top: {}", self.cards.len(), card),
+        if self.cards.len() == 0 {
+            write!(f, "Empty deck")
+        } else {
+            let s = self
+                .cards
+                .iter()
+                .map(|c| c.name())
+                .collect::<Vec<_>>()
+                .join(", ");
+
+            write!(f, "{} left. {}", self.cards.len(), s)
         }
     }
 }
@@ -65,51 +63,47 @@ impl Display for Deck {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::state::testcard::TestCard;
 
     #[test]
-    fn test_basic_functions() {
-        let mut deck = Deck::default();
-        assert_eq!(16, deck.cards_remaining());
+    fn test_basic() {
+        let mut deck = Deck::new(vec![
+	    TestCard::boxed("One", 1),
+	    TestCard::boxed("Two", 2),
+	    TestCard::boxed("Three", 3),
+        ]);
 
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
-        assert!(deck.deal_one().is_some());
+        assert_eq!(3, deck.cards_remaining());
+        assert_eq!("One", deck.deal_one().unwrap().name());
+        assert_eq!(2, deck.cards_remaining());
+        assert_eq!("Two", deck.deal_one().unwrap().name());
         assert_eq!(1, deck.cards_remaining());
-        assert!(deck.deal_one().is_some());
-        assert_eq!(0, deck.cards_remaining());
-        assert!(deck.deal_one().is_none());
+        assert_eq!("Three", deck.deal_one().unwrap().name());
         assert_eq!(0, deck.cards_remaining());
     }
 
     #[test]
     fn test_shuffle() {
-        // Just making sure that the default deck and the shuffled deck have the same cards.
-        let mut deck = Deck::default();
-        let mut cards = Vec::default();
-        while let Some(card) = deck.deal_one() {
-            cards.push(card);
-        }
+        // We aren't testing the randomness or anything.
+        // We just want to make sure that all of the cards are in the shuffled
+        // deck exactly once.
+        let mut deck = Deck::new(vec![
+	    TestCard::boxed("One", 1),
+	    TestCard::boxed("Two", 2),
+	    TestCard::boxed("Three", 3),
+	    TestCard::boxed("Four", 4),
+	    TestCard::boxed("Five", 5),
+	    TestCard::boxed("Six", 6),
+	    TestCard::boxed("Seven", 7),
+        ]);
 
-        let mut shuffled = Deck::default();
-        let mut shuffled_cards = Vec::default();
-        while let Some(card) = shuffled.deal_one() {
-            shuffled_cards.push(card);
-        }
+        deck.shuffle();
 
-        cards.sort();
-        shuffled_cards.sort();
-        assert_eq!(cards, shuffled_cards)
+        let mut card_names: Vec<&str> = deck.cards.iter().map(|c| c.name()).collect();
+        card_names.sort();
+        assert_eq!(
+            &vec!["Five", "Four", "One", "Seven", "Six", "Three", "Two"],
+            &card_names
+        );
     }
 }

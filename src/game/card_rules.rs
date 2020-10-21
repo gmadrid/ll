@@ -209,6 +209,13 @@ mod test {
             [0, 1, 2, 3],
             [1]
         );
+	valid_action!(
+	    (Card::Baron, 0, Some(2), None),
+	    rules,
+	    0,
+	    [0, 1, 2, 3],
+	    [1]
+	);
     }
 
     #[throws]

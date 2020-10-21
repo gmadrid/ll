@@ -1,12 +1,17 @@
 use crate::state::Player;
 
+/// Trait describing a mechanism for sending messages.
+/// Briefly, messages may be sent to a single player or all players.
 pub trait Messenger {
+    /// Send a message to the specified player, or to all players if no Player is given.
     fn message(&mut self, player: Option<&Player>, msg: &str);
 
+    /// Convenience functions for sending a message to all players.
     fn to_all(&mut self, msg: &str) {
         self.message(None, msg);
     }
 
+    /// Convenience function for sending a message to a single player.
     fn to_player(&mut self, player: &Player, msg: &str) {
         self.message(Some(player), msg);
     }
